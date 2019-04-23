@@ -1,0 +1,33 @@
+
+The range of both a and delta are in [-1, 1]. For the actual kinematics, the range of delta is in between [-25, 25 ] degrees.
+
+The Model
+The model is implemented in MPC.cpp. To create the model, all parts must be calculated for every timestep: x position, y position, vehicle heading (psi), velocity, crosstrack error, and vehicle heading error. The model is defined by the following equations:
+x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+v_[t+1] = v[t] + a[t] * dt
+cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+
+
+
+Timestep Length and Elapsed Duration
+N and dt are very important for a MPC. 
+These two values depict the spacing and number of time steps ahead that the MPC will simulate, resulting in a look-ahead window. 
+Too short a lookahead window, the vehicle might not have enough trajectory calculated to accurately to keep on track.
+Too long of a lookahead window and the calculation may get too expensive for the processor.
+I tried different sets of (N,dt)s to see different results. And I ended up with:
+
+N = 7
+dt = 0.1
+
+Polynomial Fitting and MPC Preprocessing
+I transformed the coordinate of the waypoints to the new coordinate system and fitted polynomials to the transformed coordinates. MPC was also working with the coordinate system, cendered at the vehicle.
+
+
+Model Predictive Control with Latency
+1. I chose the dt to be aligned with the latency. (dt = 0.1s == 100ms)
+2. Shifted the actuation inside the MPC optimization algorithm by 1. (line# 101 in MPC.cpp)
+
+The simulated vehicle is able to traverse the entire track.
